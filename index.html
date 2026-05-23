@@ -1,0 +1,1530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How Hermes Agent Works</title>
+<style>
+/* ===== CSS Custom Properties ===== */
+:root {
+  --bg-deep: #0d1117;
+  --bg-card: #161b22;
+  --bg-elevated: #1c2128;
+  --border: #30363d;
+  --border-light: #21262d;
+  --text-primary: #e6edf3;
+  --text-secondary: #8b949e;
+  --text-muted: #6e7681;
+  --accent-amber: #f0c040;
+  --accent-cyan: #58a6ff;
+  --accent-green: #3fb950;
+  --accent-purple: #bc8cff;
+  --accent-red: #f85149;
+  --accent-orange: #d2991d;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --font-mono: 'SF Mono', 'Fira Code', 'Cascadia Code', 'JetBrains Mono', Consolas, monospace;
+  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif;
+  --nav-height: 52px;
+}
+
+/* ===== Reset & Base ===== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: var(--nav-height);
+}
+
+body {
+  background: var(--bg-deep);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+/* ===== Navigation ===== */
+.nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(13, 17, 23, 0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  height: var(--nav-height);
+  display: flex;
+  align-items: center;
+}
+
+.nav-inner {
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.nav-logo {
+  font-family: var(--font-mono);
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--accent-amber);
+  text-decoration: none;
+  letter-spacing: -0.02em;
+}
+
+.nav-links {
+  display: none;
+  list-style: none;
+  gap: 6px;
+}
+
+.nav-links a {
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: 0.82rem;
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  transition: color 0.15s, background 0.15s;
+  white-space: nowrap;
+}
+
+.nav-links a:hover, .nav-links a:focus-visible {
+  color: var(--text-primary);
+  background: var(--bg-elevated);
+}
+
+/* Hamburger */
+.hamburger {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 10px;
+  border-radius: var(--radius-sm);
+  min-width: 44px;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+}
+
+.hamburger span {
+  display: block;
+  width: 20px;
+  height: 2px;
+  background: var(--text-secondary);
+  border-radius: 2px;
+  transition: transform 0.2s, opacity 0.2s;
+}
+
+.hamburger.active span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.hamburger.active span:nth-child(2) { opacity: 0; }
+.hamburger.active span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+/* Mobile menu */
+.mobile-menu {
+  display: none;
+  position: fixed;
+  top: var(--nav-height);
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--bg-deep);
+  z-index: 99;
+  padding: 16px;
+  flex-direction: column;
+  gap: 4px;
+  overflow-y: auto;
+}
+
+.mobile-menu.open { display: flex; }
+
+.mobile-menu a {
+  display: block;
+  color: var(--text-primary);
+  text-decoration: none;
+  font-size: 1.05rem;
+  padding: 14px 16px;
+  border-radius: var(--radius-md);
+  transition: background 0.15s;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+}
+
+.mobile-menu a:hover, .mobile-menu a:focus-visible {
+  background: var(--bg-elevated);
+}
+
+/* ===== Layout ===== */
+.main { max-width: 1100px; margin: 0 auto; padding: 0 16px; }
+
+section {
+  padding: 56px 0;
+  border-bottom: 1px solid var(--border-light);
+}
+
+section:last-of-type { border-bottom: none; }
+
+.section-label {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--accent-cyan);
+  margin-bottom: 8px;
+  display: block;
+}
+
+.section-title {
+  font-size: 1.55rem;
+  font-weight: 700;
+  line-height: 1.25;
+  margin-bottom: 8px;
+  letter-spacing: -0.02em;
+}
+
+.section-subtitle {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  margin-bottom: 28px;
+  max-width: 600px;
+}
+
+/* ===== Hero ===== */
+.hero {
+  text-align: center;
+  padding: 60px 0 48px;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.hero .section-label { text-align: center; }
+
+.hero-title {
+  font-size: clamp(1.8rem, 5vw, 3rem);
+  font-weight: 800;
+  line-height: 1.15;
+  margin-bottom: 12px;
+  letter-spacing: -0.03em;
+  background: linear-gradient(135deg, var(--accent-amber) 0%, var(--accent-cyan) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.hero-subtitle {
+  font-size: 1.1rem;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+}
+
+.hero-tagline {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+/* ===== Gateway Section ===== */
+.platform-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.platform-badge {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  padding: 6px 12px;
+  border-radius: 20px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  white-space: nowrap;
+  min-height: 32px;
+  display: flex;
+  align-items: center;
+}
+
+/* Arrow flow */
+.arrow-down-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.arrow-down {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.arrow-down-line {
+  width: 1.5px;
+  height: 32px;
+  background: var(--border);
+}
+
+.arrow-down-head {
+  width: 0;
+  height: 0;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-top: 10px solid var(--border);
+}
+
+.gateway-box {
+  max-width: 460px;
+  margin: 0 auto;
+  background: var(--bg-card);
+  border: 1.5px solid var(--accent-cyan);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  text-align: center;
+}
+
+.gateway-box-title {
+  font-family: var(--font-mono);
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--accent-cyan);
+  margin-bottom: 4px;
+}
+
+.gateway-box-desc {
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  margin-bottom: 10px;
+}
+
+.gateway-box-badge {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  padding: 4px 10px;
+  border-radius: 12px;
+  background: rgba(88, 166, 255, 0.1);
+  color: var(--accent-cyan);
+}
+
+/* ===== Agent Loop ===== */
+.loop-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  position: relative;
+}
+
+.loop-step {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  width: 100%;
+  max-width: 380px;
+  text-align: center;
+  position: relative;
+  z-index: 1;
+  transition: border-color 0.3s;
+}
+
+.loop-step:hover { border-color: var(--accent-cyan); }
+
+.loop-step-number {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--accent-amber);
+  display: block;
+  margin-bottom: 4px;
+}
+
+.loop-step-title {
+  font-weight: 700;
+  font-size: 1rem;
+  margin-bottom: 4px;
+}
+
+.loop-step-detail {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.loop-arrow {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 6px 0;
+}
+
+.loop-arrow-line {
+  width: 1.5px;
+  height: 24px;
+  background: var(--accent-amber);
+}
+
+.loop-arrow-head {
+  width: 0;
+  height: 0;
+  border-left: 7px solid transparent;
+  border-right: 7px solid transparent;
+  border-top: 9px solid var(--accent-amber);
+}
+
+/* Decision diamond */
+.decision-diamond {
+  background: var(--bg-card);
+  border: 1.5px solid var(--accent-amber);
+  border-radius: var(--radius-md);
+  padding: 16px 20px;
+  width: 100%;
+  max-width: 300px;
+  text-align: center;
+  position: relative;
+  z-index: 1;
+}
+
+.decision-title {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--accent-amber);
+  margin-bottom: 10px;
+}
+
+.decision-branches {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+}
+
+.decision-yes, .decision-no {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 6px 16px;
+  border-radius: 20px;
+  min-height: 34px;
+  display: flex;
+  align-items: center;
+}
+
+.decision-yes {
+  background: rgba(63, 185, 80, 0.12);
+  color: var(--accent-green);
+  border: 1px solid rgba(63, 185, 80, 0.25);
+}
+
+.decision-no {
+  background: rgba(248, 81, 73, 0.1);
+  color: var(--accent-red);
+  border: 1px solid rgba(248, 81, 73, 0.2);
+}
+
+/* Execute tool step */
+.tool-execute-step {
+  background: var(--bg-card);
+  border: 1px solid var(--accent-green);
+  border-radius: var(--radius-md);
+  padding: 14px 20px;
+  width: 100%;
+  max-width: 280px;
+  text-align: center;
+}
+
+.tool-execute-title {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--accent-green);
+}
+
+.tool-execute-detail {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  margin-top: 2px;
+}
+
+/* Reply step */
+.reply-step {
+  background: var(--bg-card);
+  border: 1px solid var(--accent-purple);
+  border-radius: var(--radius-md);
+  padding: 14px 20px;
+  width: 100%;
+  max-width: 280px;
+  text-align: center;
+}
+
+.reply-title {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--accent-purple);
+}
+
+/* Loop-back arrow */
+.loop-back {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 0;
+}
+
+.loop-back-label {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--accent-amber);
+}
+
+.loop-back-arrow {
+  display: flex;
+  align-items: center;
+}
+
+.loop-back-line {
+  width: 60px;
+  height: 1.5px;
+  background: var(--accent-amber);
+}
+
+.loop-back-head {
+  width: 0;
+  height: 0;
+  border-top: 6px solid transparent;
+  border-bottom: 6px solid transparent;
+  border-left: 8px solid var(--accent-amber);
+}
+
+/* Input feeds */
+.loop-inputs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: center;
+  margin-top: 8px;
+}
+
+.loop-input-tag {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  padding: 3px 8px;
+  border-radius: 10px;
+  background: rgba(240, 192, 64, 0.08);
+  color: var(--accent-amber);
+  border: 1px solid rgba(240, 192, 64, 0.15);
+}
+
+/* Loop note */
+.loop-note {
+  text-align: center;
+  margin-top: 20px;
+  padding: 12px 16px;
+  background: rgba(240, 192, 64, 0.05);
+  border-radius: var(--radius-md);
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.loop-note strong { color: var(--accent-amber); }
+
+/* Branch row (mobile: stack vertically) */
+.loop-branches-row {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  margin-top: 12px;
+}
+
+.loop-branch-yes, .loop-branch-no {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ===== Tools Section ===== */
+.tools-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.tool-category {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 18px;
+}
+
+.tool-cat-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.tool-cat-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+.tool-cat-icon.system { background: rgba(240, 192, 64, 0.12); }
+.tool-cat-icon.web { background: rgba(88, 166, 255, 0.12); }
+.tool-cat-icon.memory { background: rgba(188, 140, 255, 0.12); }
+.tool-cat-icon.meta { background: rgba(63, 185, 80, 0.12); }
+
+.tool-cat-name {
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.tool-cat-desc {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.tool-items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.tool-item {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  padding: 5px 10px;
+  border-radius: 6px;
+  background: var(--bg-elevated);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-light);
+  white-space: nowrap;
+}
+
+.tools-note {
+  text-align: center;
+  margin-top: 16px;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.tools-note strong { color: var(--accent-cyan); }
+
+/* ===== Skills & Memory ===== */
+.skills-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  position: relative;
+  padding-left: 24px;
+}
+
+.skills-timeline::before {
+  content: '';
+  position: absolute;
+  left: 8px;
+  top: 8px;
+  bottom: 8px;
+  width: 2px;
+  background: var(--border);
+}
+
+.timeline-step {
+  position: relative;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 16px;
+}
+
+.timeline-step::before {
+  content: '';
+  position: absolute;
+  left: -20px;
+  top: 22px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--accent-amber);
+  border: 2px solid var(--bg-deep);
+}
+
+.timeline-step:nth-child(2)::before { background: var(--accent-cyan); }
+.timeline-step:nth-child(3)::before { background: var(--accent-green); }
+
+.timeline-session {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--accent-amber);
+  margin-bottom: 4px;
+  font-weight: 700;
+}
+
+.timeline-step:nth-child(2) .timeline-session { color: var(--accent-cyan); }
+.timeline-step:nth-child(3) .timeline-session { color: var(--accent-green); }
+
+.timeline-title {
+  font-weight: 700;
+  font-size: 0.95rem;
+  margin-bottom: 4px;
+}
+
+.timeline-desc {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+}
+
+.skills-memory-diff {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.diff-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  text-align: center;
+}
+
+.diff-card-icon {
+  font-size: 1.5rem;
+  margin-bottom: 6px;
+}
+
+.diff-card-title {
+  font-weight: 700;
+  font-size: 0.95rem;
+  margin-bottom: 4px;
+}
+
+.diff-card-desc {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+/* ===== Big Picture ===== */
+.arch-diagram {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+}
+
+.arch-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: center;
+}
+
+.arch-box {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 8px 14px;
+  text-align: center;
+  color: var(--text-secondary);
+  min-width: 64px;
+  min-height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.arch-box.platform { background: rgba(240, 192, 64, 0.06); border-color: rgba(240, 192, 64, 0.2); }
+.arch-box.gateway { background: rgba(88, 166, 255, 0.08); border-color: var(--accent-cyan); color: var(--accent-cyan); font-weight: 700; }
+.arch-box.core { background: rgba(240, 192, 64, 0.06); border-color: var(--accent-amber); color: var(--accent-amber); font-weight: 700; }
+.arch-box.component { background: rgba(188, 140, 255, 0.06); border-color: rgba(188, 140, 255, 0.2); }
+.arch-box.tool { background: rgba(63, 185, 80, 0.06); border-color: rgba(63, 185, 80, 0.2); }
+
+.arch-connector {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.arch-connector-line {
+  width: 1.5px;
+  height: 16px;
+  background: var(--border);
+}
+
+.arch-connector-head {
+  width: 0;
+  height: 0;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 7px solid var(--border);
+}
+
+.arch-split {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.arch-split-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.arch-horizontal {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.arch-h-line {
+  width: 28px;
+  height: 1.5px;
+  background: var(--border);
+}
+
+/* ===== Footer ===== */
+.footer {
+  text-align: center;
+  padding: 32px 16px;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  border-top: 1px solid var(--border-light);
+}
+
+.footer a {
+  color: var(--accent-cyan);
+  text-decoration: none;
+}
+
+.footer a:hover { text-decoration: underline; }
+
+/* ===== Back to Top ===== */
+.back-to-top {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  font-size: 1.2rem;
+  cursor: pointer;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s, transform 0.3s;
+  transform: translateY(10px);
+}
+
+.back-to-top.visible {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+
+.back-to-top:hover {
+  background: var(--bg-card);
+  color: var(--text-primary);
+  border-color: var(--accent-cyan);
+}
+
+/* ===== Animations ===== */
+.fade-in {
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+}
+
+.fade-in.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fade-in { transition: none; opacity: 1; transform: none; }
+  html { scroll-behavior: auto; }
+}
+
+/* ===== Media Queries ===== */
+
+/* 540px+ */
+@media (min-width: 540px) {
+  .tools-grid { grid-template-columns: repeat(2, 1fr); }
+  .skills-memory-diff { flex-direction: row; }
+  .skills-memory-diff > * { flex: 1; }
+}
+
+/* 768px+ */
+@media (min-width: 768px) {
+  .nav-links { display: flex; }
+  .hamburger { display: none; }
+  .mobile-menu { display: none !important; }
+
+  section { padding: 72px 0; }
+  .hero { padding: 80px 0 64px; }
+
+  .section-title { font-size: 1.8rem; }
+
+  /* Agent loop: horizontal-ish layout */
+  .loop-container {
+    display: grid;
+    grid-template-columns: 1fr 60px 1fr;
+    grid-template-rows: auto auto auto auto;
+    gap: 0;
+    align-items: center;
+    justify-items: center;
+    max-width: 700px;
+    margin: 0 auto;
+  }
+
+  .loop-step.step-build {
+    grid-column: 1;
+    grid-row: 1;
+  }
+  .loop-arrow.arrow-1 {
+    grid-column: 2;
+    grid-row: 1;
+  }
+  .loop-step.step-llm {
+    grid-column: 3;
+    grid-row: 1;
+  }
+  .loop-arrow.arrow-2 {
+    grid-column: 2;
+    grid-row: 2;
+    transform: rotate(90deg);
+  }
+
+  .decision-diamond {
+    grid-column: 1 / -1;
+    grid-row: 3;
+    max-width: 360px;
+  }
+
+  .loop-arrow.arrow-3-yes {
+    grid-column: 1;
+    grid-row: 4;
+  }
+  .tool-execute-step {
+    grid-column: 1;
+    grid-row: 4;
+    margin-top: -50px;
+  }
+  .loop-step.step-no {
+    grid-column: 3;
+    grid-row: 4;
+    margin-top: -50px;
+  }
+  .reply-step {
+    grid-column: 3;
+    grid-row: 4;
+  }
+
+  .loop-back { grid-column: 1 / -1; grid-row: 5; }
+
+  /* But on tablet, revert to simpler vertical for reliability */
+  .loop-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    max-width: 500px;
+    margin: 0 auto;
+  }
+
+  .tools-grid { grid-template-columns: repeat(2, 1fr); }
+
+  .skills-timeline {
+    flex-direction: row;
+    padding-left: 0;
+    padding-top: 0;
+  }
+  .skills-timeline::before {
+    left: 8px;
+    right: 8px;
+    top: 8px;
+    bottom: auto;
+    width: auto;
+    height: 2px;
+  }
+  .timeline-step { flex: 1; }
+  .timeline-step::before {
+    left: 50%;
+    top: -20px;
+    transform: translateX(-50%);
+  }
+}
+
+/* 1024px+ */
+@media (min-width: 1024px) {
+  .main { padding: 0 24px; }
+  .nav-inner { padding: 0 24px; }
+
+  .section-title { font-size: 2rem; }
+
+  /* Agent loop: true horizontal/circular feel */
+  .loop-container {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    max-width: 900px;
+  }
+
+  .loop-step.step-build {
+    order: 0;
+    max-width: 220px;
+  }
+  .loop-arrow.arrow-1 {
+    order: 1;
+    transform: rotate(-90deg);
+    margin: 0 4px;
+  }
+  .loop-step.step-llm {
+    order: 2;
+    max-width: 220px;
+  }
+  .loop-arrow.arrow-2 {
+    order: 3;
+    transform: rotate(-90deg);
+    margin: 0 4px;
+  }
+  .decision-diamond {
+    order: 4;
+    max-width: 220px;
+  }
+
+  /* Branch row (desktop: side by side) */
+  .loop-branches-row {
+    flex-direction: row;
+    justify-content: center;
+    gap: 40px;
+    margin-top: 16px;
+    width: 100%;
+    order: 5;
+  }
+
+  .loop-branch-yes, .loop-branch-no {
+    gap: 8px;
+  }
+
+  .tool-execute-step { max-width: 200px; }
+  .reply-step { max-width: 200px; }
+
+  .loop-back {
+    order: 6;
+    width: 100%;
+    margin-top: 12px;
+  }
+
+  .tools-grid { grid-template-columns: repeat(4, 1fr); }
+
+  .platform-badge { font-size: 0.76rem; padding: 8px 14px; }
+}
+
+/* 1200px+ */
+@media (min-width: 1200px) {
+  .main { max-width: 1100px; }
+}
+</style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav class="nav" aria-label="Main navigation">
+  <div class="nav-inner">
+    <a href="#hero" class="nav-logo">◈ Hermes Agent</a>
+    <ul class="nav-links">
+      <li><a href="#gateway">Gateway</a></li>
+      <li><a href="#agent-loop">Agent Loop</a></li>
+      <li><a href="#tools">Tools</a></li>
+      <li><a href="#skills">Skills &amp; Memory</a></li>
+      <li><a href="#big-picture">Big Picture</a></li>
+    </ul>
+    <button class="hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+  </div>
+</nav>
+
+<!-- Mobile Menu -->
+<div class="mobile-menu" id="mobileMenu" role="navigation" aria-label="Mobile navigation">
+  <a href="#gateway">📡 Gateway Layer</a>
+  <a href="#agent-loop">🔄 The Agent Loop</a>
+  <a href="#tools">🛠 Tools</a>
+  <a href="#skills">🧠 Skills &amp; Memory</a>
+  <a href="#big-picture">🗺 The Big Picture</a>
+</div>
+
+<!-- Main Content -->
+<main class="main">
+
+  <!-- 1. Hero -->
+  <section id="hero" class="hero fade-in">
+    <span class="section-label">Architecture</span>
+    <h1 class="hero-title">How Hermes Agent Works</h1>
+    <p class="hero-subtitle">A visual guide to the architecture</p>
+    <p class="hero-tagline">
+      An open-source AI agent framework by <strong>Nous Research</strong> that runs on your terminal and connects to 10+ messaging platforms — one brain, everywhere.
+    </p>
+  </section>
+
+  <!-- 2. Gateway Layer -->
+  <section id="gateway" class="fade-in">
+    <span class="section-label">Layer 1</span>
+    <h2 class="section-title">The Gateway Layer</h2>
+    <p class="section-subtitle">
+      The gateway is a background service that connects to 10+ messaging platforms. All messages flow into one agent brain.
+    </p>
+
+    <div class="platform-row">
+      <span class="platform-badge">💬 Telegram</span>
+      <span class="platform-badge">🎮 Discord</span>
+      <span class="platform-badge">💼 Slack</span>
+      <span class="platform-badge">🟢 WeChat</span>
+      <span class="platform-badge">🔐 Signal</span>
+      <span class="platform-badge">📧 Email</span>
+      <span class="platform-badge">📱 SMS</span>
+      <span class="platform-badge">🌐 Matrix</span>
+      <span class="platform-badge">📲 WhatsApp</span>
+      <span class="platform-badge">🍎 iMessage</span>
+    </div>
+
+    <div class="arrow-down-container">
+      <div class="arrow-down">
+        <div class="arrow-down-line"></div>
+        <div class="arrow-down-line"></div>
+        <div class="arrow-down-line"></div>
+        <div class="arrow-down-head"></div>
+      </div>
+    </div>
+
+    <div class="gateway-box">
+      <div class="gateway-box-title">⚙️ Hermes Gateway</div>
+      <div class="gateway-box-desc">
+        Normalizes messages, manages platform-specific quirks, handles attachments, and queues everything into a single inbox for the agent.
+      </div>
+      <span class="gateway-box-badge">Always on · systemd service</span>
+    </div>
+  </section>
+
+  <!-- 3. Agent Loop -->
+  <section id="agent-loop" class="fade-in">
+    <span class="section-label">Layer 2 · The Core</span>
+    <h2 class="section-title">The Agent Loop</h2>
+    <p class="section-subtitle">
+      Every message goes through this cycle. The agent can call tools multiple times before replying — it thinks, acts, observes, and repeats until it's ready.
+    </p>
+
+    <div class="loop-container">
+      <!-- Step 1: Build Prompt -->
+      <div class="loop-step step-build">
+        <span class="loop-step-number">STEP 1</span>
+        <div class="loop-step-title">Build Prompt</div>
+        <div class="loop-step-detail">Assembles the system prompt from personality, loaded skills, and relevant memories</div>
+        <div class="loop-inputs">
+          <span class="loop-input-tag">Personality</span>
+          <span class="loop-input-tag">Memory</span>
+          <span class="loop-input-tag">Skills</span>
+        </div>
+      </div>
+
+      <div class="loop-arrow arrow-1">
+        <div class="loop-arrow-line"></div>
+        <div class="loop-arrow-head"></div>
+      </div>
+
+      <!-- Step 2: Call LLM -->
+      <div class="loop-step step-llm">
+        <span class="loop-step-number">STEP 2</span>
+        <div class="loop-step-title">Call LLM</div>
+        <div class="loop-step-detail">Sends the prompt to any provider — DeepSeek, Claude, GPT, Gemini, local models, or custom APIs</div>
+      </div>
+
+      <div class="loop-arrow arrow-2">
+        <div class="loop-arrow-line"></div>
+        <div class="loop-arrow-head"></div>
+      </div>
+
+      <!-- Decision Diamond -->
+      <div class="decision-diamond">
+        <div class="decision-title">Tool call needed?</div>
+        <div class="decision-branches">
+          <span class="decision-yes">✓ YES</span>
+          <span class="decision-no">✗ NO</span>
+        </div>
+      </div>
+
+      <!-- YES branch: Execute Tool -->
+      <div class="loop-branches-row">
+        <div class="loop-branch-yes">
+          <div class="loop-arrow arrow-yes-branch">
+            <div class="loop-arrow-line"></div>
+            <div class="loop-arrow-head"></div>
+          </div>
+          <div class="tool-execute-step">
+            <div class="tool-execute-title">⚡ Execute Tool</div>
+            <div class="tool-execute-detail">Browser, Terminal, File I/O, Web Search, Memory, Delegation…</div>
+          </div>
+        </div>
+
+        <div class="loop-branch-no">
+          <div class="reply-step">
+            <div class="reply-title">💬 Reply to User</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Loop back arrow -->
+      <div class="loop-back">
+        <span class="loop-back-label">result fed back</span>
+        <div class="loop-back-arrow">
+          <div class="loop-back-line"></div>
+          <div class="loop-back-head"></div>
+        </div>
+        <span class="loop-back-label">loop repeats</span>
+      </div>
+    </div>
+
+    <div class="loop-note">
+      💡 <strong>The agent can loop multiple times per message.</strong> It calls a tool, reads the result, calls another tool, and only replies when it has everything it needs. This is what makes it an <strong>agent</strong>, not just a chatbot.
+    </div>
+  </section>
+
+  <!-- 4. Tools -->
+  <section id="tools" class="fade-in">
+    <span class="section-label">Layer 3</span>
+    <h2 class="section-title">Tools — The Hands</h2>
+    <p class="section-subtitle">
+      Tools give Hermes the ability to <em>do</em> things, not just talk. They're organized into toolsets that can be toggled per platform.
+    </p>
+
+    <div class="tools-grid">
+      <!-- System -->
+      <div class="tool-category">
+        <div class="tool-cat-header">
+          <div class="tool-cat-icon system">💻</div>
+          <div>
+            <div class="tool-cat-name">System</div>
+            <div class="tool-cat-desc">Your machine, your rules</div>
+          </div>
+        </div>
+        <div class="tool-items">
+          <span class="tool-item">Terminal</span>
+          <span class="tool-item">File Ops</span>
+          <span class="tool-item">Code Exec</span>
+          <span class="tool-item">Process Mgmt</span>
+        </div>
+      </div>
+
+      <!-- Web -->
+      <div class="tool-category">
+        <div class="tool-cat-header">
+          <div class="tool-cat-icon web">🌐</div>
+          <div>
+            <div class="tool-cat-name">Web</div>
+            <div class="tool-cat-desc">The internet at hand</div>
+          </div>
+        </div>
+        <div class="tool-items">
+          <span class="tool-item">Browser</span>
+          <span class="tool-item">Web Search</span>
+          <span class="tool-item">Web Extract</span>
+          <span class="tool-item">Vision Analyze</span>
+        </div>
+      </div>
+
+      <!-- Memory -->
+      <div class="tool-category">
+        <div class="tool-cat-header">
+          <div class="tool-cat-icon memory">🧠</div>
+          <div>
+            <div class="tool-cat-name">Memory</div>
+            <div class="tool-cat-desc">Never forgets</div>
+          </div>
+        </div>
+        <div class="tool-items">
+          <span class="tool-item">Persistent Memory</span>
+          <span class="tool-item">Session Search</span>
+          <span class="tool-item">Skill Recall</span>
+          <span class="tool-item">Preference Store</span>
+        </div>
+      </div>
+
+      <!-- Meta -->
+      <div class="tool-category">
+        <div class="tool-cat-header">
+          <div class="tool-cat-icon meta">🔀</div>
+          <div>
+            <div class="tool-cat-name">Meta</div>
+            <div class="tool-cat-desc">Orchestrate &amp; delegate</div>
+          </div>
+        </div>
+        <div class="tool-items">
+          <span class="tool-item">Delegation</span>
+          <span class="tool-item">Cron Jobs</span>
+          <span class="tool-item">Clarify</span>
+          <span class="tool-item">Sub-agents</span>
+        </div>
+      </div>
+    </div>
+
+    <p class="tools-note">
+      🔧 Each platform can have a <strong>custom toolset</strong> — your work Slack gets terminal access, your public Discord doesn't.
+    </p>
+  </section>
+
+  <!-- 5. Skills & Memory -->
+  <section id="skills" class="fade-in">
+    <span class="section-label">Layer 4</span>
+    <h2 class="section-title">Skills &amp; Memory — The Learning System</h2>
+    <p class="section-subtitle">
+      Hermes gets smarter with every conversation. Corrections become skills, facts become memories, and both load automatically next time.
+    </p>
+
+    <div class="skills-timeline">
+      <div class="timeline-step">
+        <div class="timeline-session">SESSION 1</div>
+        <div class="timeline-title">You correct Hermes</div>
+        <div class="timeline-desc">
+          "Actually, when you deploy, always run <code>docker compose up -d</code> first." Hermes saves this as a <strong>SKILL</strong>.
+        </div>
+      </div>
+
+      <div class="timeline-step">
+        <div class="timeline-session">SESSION 2</div>
+        <div class="timeline-title">Skill auto-loads</div>
+        <div class="timeline-desc">
+          You ask about deployment again. The skill loads automatically — Hermes already knows your procedure. No correction needed.
+        </div>
+      </div>
+
+      <div class="timeline-step">
+        <div class="timeline-session">SESSION 3</div>
+        <div class="timeline-title">Memory persists preferences</div>
+        <div class="timeline-desc">
+          Hermes remembers you prefer Pacific Time, use pnpm over npm, and deploy to AWS us-west-2. It adapts without being told again.
+        </div>
+      </div>
+    </div>
+
+    <div class="skills-memory-diff">
+      <div class="diff-card">
+        <div class="diff-card-icon">📋</div>
+        <div class="diff-card-title">SKILLS</div>
+        <div class="diff-card-desc">
+          <strong>Procedural knowledge</strong> — how to do things. Reusable across sessions. Like macros on steroids.
+        </div>
+      </div>
+      <div class="diff-card">
+        <div class="diff-card-icon">💾</div>
+        <div class="diff-card-title">MEMORY</div>
+        <div class="diff-card-desc">
+          <strong>Factual knowledge</strong> — who you are, your preferences, past decisions. Grows with every interaction.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6. Big Picture -->
+  <section id="big-picture" class="fade-in">
+    <span class="section-label">Full Architecture</span>
+    <h2 class="section-title">The Big Picture</h2>
+    <p class="section-subtitle">
+      How all the pieces fit together — from platform messages to tool execution.
+    </p>
+
+    <div class="arch-diagram">
+      <!-- Platform row -->
+      <div class="arch-row">
+        <div class="arch-box platform">Telegram</div>
+        <div class="arch-box platform">Discord</div>
+        <div class="arch-box platform">Slack</div>
+        <div class="arch-box platform">WeChat</div>
+        <div class="arch-box platform">Signal</div>
+        <div class="arch-box platform">Email</div>
+        <div class="arch-box platform">SMS</div>
+        <div class="arch-box platform">Matrix</div>
+        <div class="arch-box platform">+ more</div>
+      </div>
+
+      <div class="arch-connector">
+        <div class="arch-connector-line"></div>
+        <div class="arch-connector-line"></div>
+        <div class="arch-connector-head"></div>
+      </div>
+
+      <!-- Gateway -->
+      <div class="arch-box gateway" style="min-width: 200px; padding: 12px 24px;">GATEWAY 🔄</div>
+
+      <div class="arch-connector">
+        <div class="arch-connector-line"></div>
+        <div class="arch-connector-line"></div>
+        <div class="arch-connector-head"></div>
+      </div>
+
+      <!-- Agent Loop -->
+      <div class="arch-box core" style="min-width: 200px; padding: 12px 24px;">AGENT LOOP</div>
+
+      <div class="arch-connector">
+        <div class="arch-connector-line"></div>
+        <div class="arch-connector-head"></div>
+      </div>
+
+      <!-- Split: Personality + Memory + Skills -->
+      <div class="arch-split">
+        <div class="arch-split-col">
+          <div class="arch-box component">Personality</div>
+          <div class="arch-connector">
+            <div class="arch-connector-line" style="height: 10px;"></div>
+            <div class="arch-connector-head"></div>
+          </div>
+          <div style="font-size: 0.65rem; color: var(--text-muted); text-align: center;">System prompt<br>+ tone + rules</div>
+        </div>
+        <div class="arch-split-col">
+          <div class="arch-box component">Memory</div>
+          <div class="arch-connector">
+            <div class="arch-connector-line" style="height: 10px;"></div>
+            <div class="arch-connector-head"></div>
+          </div>
+          <div style="font-size: 0.65rem; color: var(--text-muted); text-align: center;">Facts + prefs<br>+ session history</div>
+        </div>
+        <div class="arch-split-col">
+          <div class="arch-box component">Skills</div>
+          <div class="arch-connector">
+            <div class="arch-connector-line" style="height: 10px;"></div>
+            <div class="arch-connector-head"></div>
+          </div>
+          <div style="font-size: 0.65rem; color: var(--text-muted); text-align: center;">Procedural<br>knowledge</div>
+        </div>
+      </div>
+
+      <div class="arch-connector" style="margin-top: 8px;">
+        <div class="arch-connector-line"></div>
+        <div class="arch-connector-head"></div>
+      </div>
+
+      <!-- Tools row -->
+      <div class="arch-row">
+        <div class="arch-box tool">Terminal</div>
+        <div class="arch-box tool">Browser</div>
+        <div class="arch-box tool">File I/O</div>
+        <div class="arch-box tool">Web Search</div>
+        <div class="arch-box tool">Memory</div>
+        <div class="arch-box tool">Delegation</div>
+        <div class="arch-box tool">Cron</div>
+        <div class="arch-box tool">+ 15 more</div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- Footer -->
+<footer class="footer">
+  <p>
+    Hermes Agent is an open-source project by <a href="https://github.com/NousResearch/hermes-agent" target="_blank" rel="noopener">Nous Research</a>.
+    Licensed under Apache 2.0.
+  </p>
+</footer>
+
+<!-- Back to top -->
+<button class="back-to-top" id="backToTop" aria-label="Back to top" title="Back to top">↑</button>
+
+<script>
+// Mobile menu toggle
+const hamburger = document.getElementById('hamburger');
+const mobileMenu = document.getElementById('mobileMenu');
+
+hamburger.addEventListener('click', () => {
+  const isOpen = mobileMenu.classList.toggle('open');
+  hamburger.classList.toggle('active', isOpen);
+  hamburger.setAttribute('aria-expanded', isOpen);
+});
+
+// Close mobile menu when a link is clicked
+mobileMenu.querySelectorAll('a').forEach(link => {
+  link.addEventListener('click', () => {
+    mobileMenu.classList.remove('open');
+    hamburger.classList.remove('active');
+    hamburger.setAttribute('aria-expanded', 'false');
+  });
+});
+
+// Back to top button
+const backToTop = document.getElementById('backToTop');
+
+function updateBackToTop() {
+  if (window.scrollY > 400) {
+    backToTop.classList.add('visible');
+  } else {
+    backToTop.classList.remove('visible');
+  }
+}
+
+window.addEventListener('scroll', updateBackToTop, { passive: true });
+
+backToTop.addEventListener('click', () => {
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+
+// Scroll-triggered fade-in
+const fadeEls = document.querySelectorAll('.fade-in');
+
+const fadeObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+      fadeObserver.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+
+fadeEls.forEach(el => fadeObserver.observe(el));
+
+// Initial check for back-to-top
+updateBackToTop();
+</script>
+
+</body>
+</html>
