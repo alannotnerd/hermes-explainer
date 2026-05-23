@@ -1,0 +1,1326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Signal — Pre-Listing Risk Intelligence</title>
+<style>
+/* ===== CSS Custom Properties ===== */
+:root {
+  --bg-deep: #0d1117;
+  --bg-card: #161b22;
+  --bg-elevated: #1c2128;
+  --border: #30363d;
+  --border-light: #21262d;
+  --text-primary: #e6edf3;
+  --text-secondary: #8b949e;
+  --text-muted: #6e7681;
+  --accent-amber: #f0c040;
+  --accent-cyan: #58a6ff;
+  --accent-green: #3fb950;
+  --accent-purple: #bc8cff;
+  --accent-red: #f85149;
+  --accent-orange: #d2991d;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --font-mono: 'SF Mono', 'Fira Code', 'Cascadia Code', 'JetBrains Mono', Consolas, monospace;
+  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif;
+  --nav-height: 52px;
+}
+
+/* ===== Reset & Base ===== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: var(--nav-height);
+}
+
+body {
+  background: var(--bg-deep);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+/* ===== Navigation ===== */
+.nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(13, 17, 23, 0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  height: var(--nav-height);
+  display: flex;
+  align-items: center;
+}
+
+.nav-inner {
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.nav-logo {
+  font-family: var(--font-mono);
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--accent-amber);
+  text-decoration: none;
+  letter-spacing: -0.02em;
+}
+
+.nav-links {
+  display: none;
+  list-style: none;
+  gap: 6px;
+}
+
+.nav-links a {
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: 0.82rem;
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  transition: color 0.15s, background 0.15s;
+  white-space: nowrap;
+}
+
+.nav-links a:hover, .nav-links a:focus-visible {
+  color: var(--text-primary);
+  background: var(--bg-elevated);
+}
+
+/* Hamburger */
+.hamburger {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 10px;
+  border-radius: var(--radius-sm);
+  min-width: 44px;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+}
+
+.hamburger span {
+  display: block;
+  width: 20px;
+  height: 2px;
+  background: var(--text-secondary);
+  border-radius: 2px;
+  transition: transform 0.2s, opacity 0.2s;
+}
+
+.hamburger.active span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.hamburger.active span:nth-child(2) { opacity: 0; }
+.hamburger.active span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+/* Mobile menu */
+.mobile-menu {
+  display: none;
+  position: fixed;
+  top: var(--nav-height);
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--bg-deep);
+  z-index: 99;
+  padding: 16px;
+  flex-direction: column;
+  gap: 4px;
+  overflow-y: auto;
+}
+
+.mobile-menu.open { display: flex; }
+
+.mobile-menu a {
+  display: block;
+  color: var(--text-primary);
+  text-decoration: none;
+  font-size: 1.05rem;
+  padding: 14px 16px;
+  border-radius: var(--radius-md);
+  transition: background 0.15s;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+}
+
+.mobile-menu a:hover, .mobile-menu a:focus-visible {
+  background: var(--bg-elevated);
+}
+
+/* ===== Layout ===== */
+.main { max-width: 1100px; margin: 0 auto; padding: 0 16px; }
+
+section {
+  padding: 56px 0;
+  border-bottom: 1px solid var(--border-light);
+}
+
+section:last-of-type { border-bottom: none; }
+
+.section-label {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--accent-cyan);
+  margin-bottom: 8px;
+  display: block;
+}
+
+.section-title {
+  font-size: 1.55rem;
+  font-weight: 700;
+  line-height: 1.25;
+  margin-bottom: 8px;
+  letter-spacing: -0.02em;
+}
+
+.section-subtitle {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  margin-bottom: 28px;
+  max-width: 600px;
+}
+
+/* ===== Hero ===== */
+.hero {
+  text-align: center;
+  padding: 60px 0 48px;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.hero .section-label { text-align: center; }
+
+.hero-title {
+  font-size: clamp(1.8rem, 5vw, 3rem);
+  font-weight: 800;
+  line-height: 1.15;
+  margin-bottom: 12px;
+  letter-spacing: -0.03em;
+  background: linear-gradient(135deg, var(--accent-amber) 0%, var(--accent-cyan) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.hero-subtitle {
+  font-size: 1.1rem;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+}
+
+.hero-tagline {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.hero-context {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  margin-top: 16px;
+  padding: 6px 14px;
+  border-radius: 20px;
+  background: rgba(240, 192, 64, 0.08);
+  color: var(--accent-amber);
+  border: 1px solid rgba(240, 192, 64, 0.15);
+}
+
+/* ===== Phase Progression ===== */
+.phase-progress {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.phase-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  transition: border-color 0.3s;
+}
+
+.phase-card:hover { border-color: var(--accent-cyan); }
+
+.phase-card.current {
+  border-color: var(--accent-amber);
+  background: rgba(240, 192, 64, 0.04);
+}
+
+.phase-num {
+  font-family: var(--font-mono);
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--accent-amber);
+  min-width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgba(240, 192, 64, 0.1);
+  border: 1px solid rgba(240, 192, 64, 0.2);
+  flex-shrink: 0;
+}
+
+.phase-card.current .phase-num {
+  background: rgba(240, 192, 64, 0.18);
+  border-color: var(--accent-amber);
+}
+
+.phase-info-title {
+  font-weight: 700;
+  font-size: 0.95rem;
+  margin-bottom: 2px;
+}
+
+.phase-info-desc {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+}
+
+.phase-connector {
+  display: flex;
+  justify-content: center;
+  padding: 2px 0;
+}
+
+.phase-connector-line {
+  width: 1.5px;
+  height: 16px;
+  background: var(--border);
+}
+
+/* ===== Onboarding Cards ===== */
+.onboarding-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+.onboarding-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  transition: border-color 0.3s;
+}
+
+.onboarding-card:hover { border-color: var(--accent-cyan); }
+
+.onboarding-card-icon {
+  font-size: 1.3rem;
+  margin-bottom: 6px;
+}
+
+.onboarding-card-title {
+  font-weight: 700;
+  font-size: 0.9rem;
+  margin-bottom: 4px;
+}
+
+.onboarding-card-items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.onboarding-tag {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: var(--bg-elevated);
+  color: var(--text-muted);
+  border: 1px solid var(--border-light);
+}
+
+.onboarding-note {
+  text-align: center;
+  margin-top: 16px;
+  padding: 12px 16px;
+  background: rgba(88, 166, 255, 0.05);
+  border-radius: var(--radius-md);
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+}
+
+.onboarding-note strong { color: var(--accent-cyan); }
+
+/* ===== Detection Cards ===== */
+.detection-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+.detection-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  transition: border-color 0.3s;
+  position: relative;
+  overflow: hidden;
+}
+
+.detection-card:hover { border-color: var(--accent-red); }
+
+.detection-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 3px;
+  height: 100%;
+  background: var(--accent-red);
+  opacity: 0.4;
+  border-radius: 0 2px 2px 0;
+}
+
+.detection-card:nth-child(2)::before { background: var(--accent-orange); }
+.detection-card:nth-child(3)::before { background: var(--accent-amber); }
+.detection-card:nth-child(4)::before { background: var(--accent-purple); }
+.detection-card:nth-child(5)::before { background: var(--accent-cyan); }
+.detection-card:nth-child(6)::before { background: var(--accent-green); }
+.detection-card:nth-child(7)::before { background: var(--accent-red); }
+
+.detection-card-title {
+  font-weight: 700;
+  font-size: 0.9rem;
+  margin-bottom: 4px;
+}
+
+.detection-card-desc {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.detection-note {
+  text-align: center;
+  margin-top: 16px;
+  padding: 12px 16px;
+  background: rgba(248, 81, 73, 0.05);
+  border-radius: var(--radius-md);
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+}
+
+.detection-note strong { color: var(--accent-red); }
+
+/* ===== Workflow Pipeline ===== */
+.workflow-pipeline {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+}
+
+.workflow-step {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 18px;
+  width: 100%;
+  max-width: 380px;
+  text-align: center;
+  transition: border-color 0.3s;
+}
+
+.workflow-step:hover { border-color: var(--accent-cyan); }
+
+.workflow-step-num {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--accent-amber);
+  display: block;
+  margin-bottom: 4px;
+}
+
+.workflow-step-title {
+  font-weight: 700;
+  font-size: 1rem;
+  margin-bottom: 4px;
+}
+
+.workflow-step-desc {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.workflow-arrow {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 8px 0;
+}
+
+.workflow-arrow-line {
+  width: 1.5px;
+  height: 28px;
+  background: var(--accent-cyan);
+}
+
+.workflow-arrow-head {
+  width: 0;
+  height: 0;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-top: 10px solid var(--accent-cyan);
+}
+
+/* ===== Dashboard Modules ===== */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.dashboard-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 18px;
+  transition: border-color 0.3s;
+}
+
+.dashboard-card:hover { border-color: var(--accent-purple); }
+
+.dashboard-card-icon {
+  font-size: 1.4rem;
+  margin-bottom: 8px;
+}
+
+.dashboard-card-title {
+  font-weight: 700;
+  font-size: 0.95rem;
+  margin-bottom: 4px;
+}
+
+.dashboard-card-desc {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+}
+
+.mvp-note {
+  text-align: center;
+  margin-top: 20px;
+  padding: 14px 18px;
+  background: rgba(188, 140, 255, 0.05);
+  border-radius: var(--radius-md);
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.mvp-note strong { color: var(--accent-purple); }
+
+/* ===== Architecture Diagram ===== */
+.arch-diagram {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+}
+
+.arch-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: center;
+}
+
+.arch-box {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 8px 14px;
+  text-align: center;
+  color: var(--text-secondary);
+  min-width: 64px;
+  min-height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.arch-box.entry { background: rgba(240, 192, 64, 0.06); border-color: rgba(240, 192, 64, 0.2); }
+.arch-box.pipeline { background: rgba(88, 166, 255, 0.08); border-color: var(--accent-cyan); color: var(--accent-cyan); font-weight: 700; }
+.arch-box.engine { background: rgba(240, 192, 64, 0.06); border-color: var(--accent-amber); color: var(--accent-amber); font-weight: 700; }
+.arch-box.dashboard { background: rgba(188, 140, 255, 0.08); border-color: var(--accent-purple); color: var(--accent-purple); font-weight: 700; }
+.arch-box.sub { background: rgba(240, 192, 64, 0.04); border-color: rgba(240, 192, 64, 0.12); font-size: 0.7rem; }
+.arch-box.detect { background: rgba(248, 81, 73, 0.05); border-color: rgba(248, 81, 73, 0.15); font-size: 0.7rem; }
+.arch-box.alert { background: rgba(248, 81, 73, 0.08); border-color: var(--accent-red); color: var(--accent-red); font-weight: 700; }
+
+.arch-connector {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.arch-connector-line {
+  width: 1.5px;
+  height: 16px;
+  background: var(--border);
+}
+
+.arch-connector-head {
+  width: 0;
+  height: 0;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 7px solid var(--border);
+}
+
+.arch-split {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.arch-split-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.arch-horizontal {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.arch-h-line {
+  width: 28px;
+  height: 1.5px;
+  background: var(--border);
+}
+
+.arch-label {
+  font-size: 0.62rem;
+  color: var(--text-muted);
+  text-align: center;
+  margin-top: 2px;
+}
+
+/* ===== Challenge Cards ===== */
+.challenge-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.challenge-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 20px;
+  transition: border-color 0.3s;
+}
+
+.challenge-card:hover { border-color: var(--accent-orange); }
+
+.challenge-card-num {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--accent-orange);
+  margin-bottom: 6px;
+}
+
+.challenge-card-title {
+  font-weight: 700;
+  font-size: 1rem;
+  margin-bottom: 6px;
+}
+
+.challenge-card-desc {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+/* ===== Footer ===== */
+.footer {
+  text-align: center;
+  padding: 32px 16px;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  border-top: 1px solid var(--border-light);
+}
+
+.footer a {
+  color: var(--accent-cyan);
+  text-decoration: none;
+}
+
+.footer a:hover { text-decoration: underline; }
+
+.footer-links {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+/* ===== Back to Top ===== */
+.back-to-top {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  font-size: 1.2rem;
+  cursor: pointer;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s, transform 0.3s;
+  transform: translateY(10px);
+}
+
+.back-to-top.visible {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+
+.back-to-top:hover {
+  background: var(--bg-card);
+  color: var(--text-primary);
+  border-color: var(--accent-cyan);
+}
+
+/* ===== Animations ===== */
+.fade-in {
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+}
+
+.fade-in.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fade-in { transition: none; opacity: 1; transform: none; }
+  html { scroll-behavior: auto; }
+}
+
+/* ===== Media Queries ===== */
+
+/* 540px+ */
+@media (min-width: 540px) {
+  .onboarding-grid { grid-template-columns: repeat(2, 1fr); }
+  .detection-grid { grid-template-columns: repeat(2, 1fr); }
+  .dashboard-grid { grid-template-columns: repeat(2, 1fr); }
+  .challenge-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* 768px+ */
+@media (min-width: 768px) {
+  .nav-links { display: flex; }
+  .hamburger { display: none; }
+  .mobile-menu { display: none !important; }
+
+  section { padding: 72px 0; }
+  .hero { padding: 80px 0 64px; }
+
+  .section-title { font-size: 1.8rem; }
+
+  .onboarding-grid { grid-template-columns: repeat(3, 1fr); }
+  .detection-grid { grid-template-columns: repeat(3, 1fr); }
+  .dashboard-grid { grid-template-columns: repeat(4, 1fr); }
+
+  /* Phase: side by side */
+  .phase-progress {
+    flex-direction: row;
+    align-items: center;
+  }
+  .phase-card { flex: 1; }
+  .phase-connector {
+    flex-shrink: 0;
+    padding: 0 4px;
+  }
+  .phase-connector-line {
+    width: 24px;
+    height: 1.5px;
+  }
+
+  /* Workflow: horizontal */
+  .workflow-pipeline {
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .workflow-step {
+    max-width: 200px;
+  }
+  .workflow-arrow {
+    flex-direction: row;
+    padding: 0 4px;
+  }
+  .workflow-arrow-line {
+    width: 28px;
+    height: 1.5px;
+  }
+  .workflow-arrow-head {
+    border-left: 10px solid var(--accent-cyan);
+    border-right: none;
+    border-top: 7px solid transparent;
+    border-bottom: 7px solid transparent;
+  }
+
+  .challenge-grid { grid-template-columns: repeat(3, 1fr); }
+}
+
+/* 1024px+ */
+@media (min-width: 1024px) {
+  .main { padding: 0 24px; }
+  .nav-inner { padding: 0 24px; }
+
+  .section-title { font-size: 2rem; }
+
+  .onboarding-grid { grid-template-columns: repeat(5, 1fr); }
+  .detection-grid { grid-template-columns: repeat(4, 1fr); }
+
+  .workflow-step { max-width: 220px; }
+}
+
+/* 1200px+ */
+@media (min-width: 1200px) {
+  .main { max-width: 1100px; }
+}
+</style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav class="nav" aria-label="Main navigation">
+  <div class="nav-inner">
+    <a href="#hero" class="nav-logo">◎ Signal</a>
+    <ul class="nav-links">
+      <li><a href="#overview">Overview</a></li>
+      <li><a href="#onboarding">Onboarding</a></li>
+      <li><a href="#detection">Detection</a></li>
+      <li><a href="#workflow">Workflow</a></li>
+      <li><a href="#dashboard">Dashboard</a></li>
+      <li><a href="#architecture">Architecture</a></li>
+      <li><a href="#challenges">Challenges</a></li>
+    </ul>
+    <button class="hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+  </div>
+</nav>
+
+<!-- Mobile Menu -->
+<div class="mobile-menu" id="mobileMenu" role="navigation" aria-label="Mobile navigation">
+  <a href="#overview">📊 Overview</a>
+  <a href="#onboarding">📥 Onboarding</a>
+  <a href="#detection">🔍 Detection Engine</a>
+  <a href="#workflow">🔄 Workflow</a>
+  <a href="#dashboard">📋 MVP Dashboard</a>
+  <a href="#architecture">🏗 Architecture</a>
+  <a href="#challenges">⚡ Technical Challenges</a>
+</div>
+
+<!-- Main Content -->
+<main class="main">
+
+  <!-- 1. Hero -->
+  <section id="hero" class="hero fade-in">
+    <span class="section-label">Pre-Listing Risk Product</span>
+    <h1 class="hero-title">Signal</h1>
+    <p class="hero-subtitle">Pre-Listing Risk Intelligence</p>
+    <p class="hero-tagline">
+      Detect wash trading, Sybil attacks, and coordinated manipulation before tokens go live.
+    </p>
+    <span class="hero-context">Phase ① — 5-10 pilot partners, targeting V1 launch by 2026-05-21</span>
+  </section>
+
+  <!-- 2. Product Overview -->
+  <section id="overview" class="fade-in">
+    <span class="section-label">What Signal Does</span>
+    <h2 class="section-title">Product Overview</h2>
+    <p class="section-subtitle">
+      Signal is a pre-listing risk product that analyzes on-chain data to flag suspicious token launches before they hit exchanges.
+    </p>
+
+    <div class="phase-progress">
+      <div class="phase-card current">
+        <div class="phase-num">①</div>
+        <div>
+          <div class="phase-info-title">Pilot Partners</div>
+          <div class="phase-info-desc">5-10 pilot partners</div>
+        </div>
+      </div>
+
+      <div class="phase-connector"><div class="phase-connector-line"></div></div>
+
+      <div class="phase-card">
+        <div class="phase-num">②</div>
+        <div>
+          <div class="phase-info-title">Signal Provider</div>
+          <div class="phase-info-desc">1 signal provider + 2-3 partners</div>
+        </div>
+      </div>
+
+      <div class="phase-connector"><div class="phase-connector-line"></div></div>
+
+      <div class="phase-card">
+        <div class="phase-num">③</div>
+        <div>
+          <div class="phase-info-title">Full Platform</div>
+          <div class="phase-info-desc">Scaled to all partners</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. Onboarding -->
+  <section id="onboarding" class="fade-in">
+    <span class="section-label">Data Ingestion</span>
+    <h2 class="section-title">Onboarding — What Gets Ingested</h2>
+    <p class="section-subtitle">
+      Each token launch is onboarded with comprehensive data that forms the ground truth for risk analysis.
+    </p>
+
+    <div class="onboarding-grid">
+      <div class="onboarding-card">
+        <div class="onboarding-card-icon">📜</div>
+        <div class="onboarding-card-title">Contracts</div>
+        <div class="onboarding-card-items">
+          <span class="onboarding-tag">Token</span>
+          <span class="onboarding-tag">Distributor</span>
+          <span class="onboarding-tag">Airdrop</span>
+        </div>
+      </div>
+
+      <div class="onboarding-card">
+        <div class="onboarding-card-icon">👛</div>
+        <div class="onboarding-card-title">Wallets</div>
+        <div class="onboarding-card-items">
+          <span class="onboarding-tag">Treasury</span>
+          <span class="onboarding-tag">LP</span>
+          <span class="onboarding-tag">Market Maker</span>
+          <span class="onboarding-tag">Vesting</span>
+          <span class="onboarding-tag">Staking</span>
+        </div>
+      </div>
+
+      <div class="onboarding-card">
+        <div class="onboarding-card-icon">🎯</div>
+        <div class="onboarding-card-title">Claim Mechanics</div>
+        <div class="onboarding-card-items">
+          <span class="onboarding-tag">Claim method</span>
+          <span class="onboarding-tag">Distribution rules</span>
+        </div>
+      </div>
+
+      <div class="onboarding-card">
+        <div class="onboarding-card-icon">📊</div>
+        <div class="onboarding-card-title">Protocol Data</div>
+        <div class="onboarding-card-items">
+          <span class="onboarding-tag">On-chain metrics</span>
+          <span class="onboarding-tag">Activity stats</span>
+        </div>
+      </div>
+
+      <div class="onboarding-card">
+        <div class="onboarding-card-icon">📐</div>
+        <div class="onboarding-card-title">Allocations</div>
+        <div class="onboarding-card-items">
+          <span class="onboarding-tag">Token breakdown</span>
+          <span class="onboarding-tag">Vesting schedules</span>
+        </div>
+      </div>
+    </div>
+
+    <p class="onboarding-note">
+      📥 <strong>Onboarding = building the ground truth for each token launch</strong>
+    </p>
+  </section>
+
+  <!-- 4. Detection Engine -->
+  <section id="detection" class="fade-in">
+    <span class="section-label">Risk Analysis</span>
+    <h2 class="section-title">Detection Engine — What Signal Looks For</h2>
+    <p class="section-subtitle">
+      Seven signals are analyzed per token launch to identify suspicious patterns before they reach exchanges.
+    </p>
+
+    <div class="detection-grid">
+      <div class="detection-card">
+        <div class="detection-card-title">🔗 Wallet Coordination</div>
+        <div class="detection-card-desc">Clusters of wallets acting in concert to simulate organic activity</div>
+      </div>
+
+      <div class="detection-card">
+        <div class="detection-card-title">♻️ Recycled Wallets</div>
+        <div class="detection-card-desc">Addresses reused across multiple suspicious launches</div>
+      </div>
+
+      <div class="detection-card">
+        <div class="detection-card-title">📉 Float Auth</div>
+        <div class="detection-card-desc">Fake liquidity or artificially inflated circulating float</div>
+      </div>
+
+      <div class="detection-card">
+        <div class="detection-card-title">🎯 Concentrated Exposure</div>
+        <div class="detection-card-desc">Tokens concentrated in a small number of hands, creating manipulation risk</div>
+      </div>
+
+      <div class="detection-card">
+        <div class="detection-card-title">⚠️ Abnormal Claims</div>
+        <div class="detection-card-desc">Unusual claim patterns that deviate from stated distribution rules</div>
+      </div>
+
+      <div class="detection-card">
+        <div class="detection-card-title">📭 Low Protocol Usage</div>
+        <div class="detection-card-desc">Token with little to no genuine on-chain activity or protocol interaction</div>
+      </div>
+
+      <div class="detection-card">
+        <div class="detection-card-title">🔬 Behavioral Anomalies</div>
+        <div class="detection-card-desc">Deviations from normal launch patterns based on historical baselines</div>
+      </div>
+    </div>
+
+    <p class="detection-note">
+      🔍 <strong>Detection engine: 7 signals analyzed per token launch</strong>
+    </p>
+  </section>
+
+  <!-- 5. Workflow -->
+  <section id="workflow" class="fade-in">
+    <span class="section-label">Process</span>
+    <h2 class="section-title">Workflow — How a Review Works</h2>
+    <p class="section-subtitle">
+      From data submission to risk alert — the end-to-end review pipeline for every token launch.
+    </p>
+
+    <div class="workflow-pipeline">
+      <div class="workflow-step">
+        <span class="workflow-step-num">STEP 1</span>
+        <div class="workflow-step-title">📤 Submit</div>
+        <div class="workflow-step-desc">Token data is submitted for review, triggering the onboarding pipeline</div>
+      </div>
+
+      <div class="workflow-arrow">
+        <div class="workflow-arrow-line"></div>
+        <div class="workflow-arrow-head"></div>
+      </div>
+
+      <div class="workflow-step">
+        <span class="workflow-step-num">STEP 2</span>
+        <div class="workflow-step-title">👁 Monitor</div>
+        <div class="workflow-step-desc">Continuous on-chain monitoring begins, tracking wallets and transactions</div>
+      </div>
+
+      <div class="workflow-arrow">
+        <div class="workflow-arrow-line"></div>
+        <div class="workflow-arrow-head"></div>
+      </div>
+
+      <div class="workflow-step">
+        <span class="workflow-step-num">STEP 3</span>
+        <div class="workflow-step-title">🔎 Review</div>
+        <div class="workflow-step-desc">Analysts review flagged patterns against the detection engine signals</div>
+      </div>
+
+      <div class="workflow-arrow">
+        <div class="workflow-arrow-line"></div>
+        <div class="workflow-arrow-head"></div>
+      </div>
+
+      <div class="workflow-step">
+        <span class="workflow-step-num">STEP 4</span>
+        <div class="workflow-step-title">🚨 Alert</div>
+        <div class="workflow-step-desc">Risk alerts with conditions are generated and distributed to partners</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6. MVP Dashboard -->
+  <section id="dashboard" class="fade-in">
+    <span class="section-label">V1 Scope</span>
+    <h2 class="section-title">MVP Dashboard — What's in V1</h2>
+    <p class="section-subtitle">
+      The initial dashboard surfaces the most critical risk intelligence for partners reviewing token launches.
+    </p>
+
+    <div class="dashboard-grid">
+      <div class="dashboard-card">
+        <div class="dashboard-card-icon">🕸</div>
+        <div class="dashboard-card-title">Relationship Maps</div>
+        <div class="dashboard-card-desc">Visual wallet-to-wallet connection graphs exposing coordination networks</div>
+      </div>
+
+      <div class="dashboard-card">
+        <div class="dashboard-card-icon">📊</div>
+        <div class="dashboard-card-title">Concentration Charts</div>
+        <div class="dashboard-card-desc">Token distribution visualizations highlighting centralization risk</div>
+      </div>
+
+      <div class="dashboard-card">
+        <div class="dashboard-card-icon">⚖️</div>
+        <div class="dashboard-card-title">Protocol vs Allocation</div>
+        <div class="dashboard-card-desc">Compare claimed allocations to on-chain reality in real time</div>
+      </div>
+
+      <div class="dashboard-card">
+        <div class="dashboard-card-icon">🚩</div>
+        <div class="dashboard-card-title">Risk Flags</div>
+        <div class="dashboard-card-desc">Flagged anomalies with severity indicators and supporting evidence</div>
+      </div>
+    </div>
+
+    <p class="mvp-note">
+      📋 <strong>MVP scope is onboarding + core engine + dashboard + monitoring.</strong> Workflow infrastructure (review queues, collaboration) is post-V1.
+    </p>
+  </section>
+
+  <!-- 7. Architecture -->
+  <section id="architecture" class="fade-in">
+    <span class="section-label">System Design</span>
+    <h2 class="section-title">Architecture — The Big Picture</h2>
+    <p class="section-subtitle">
+      How data flows from token launch ingestion through detection to risk alerts.
+    </p>
+
+    <div class="arch-diagram">
+      <!-- Entry -->
+      <div class="arch-box entry" style="min-width: 200px; padding: 12px 20px; font-size: 0.78rem;">
+        Token Launch Data
+      </div>
+
+      <div class="arch-connector">
+        <div class="arch-connector-line"></div>
+        <div class="arch-connector-line"></div>
+        <div class="arch-connector-head"></div>
+      </div>
+
+      <!-- Onboarding Pipeline -->
+      <div class="arch-box pipeline" style="min-width: 200px; padding: 12px 20px;">
+        Onboarding Pipeline
+      </div>
+
+      <!-- Onboarding sub-items -->
+      <div class="arch-split">
+        <div class="arch-box sub">Contracts</div>
+        <div class="arch-box sub">Wallets</div>
+        <div class="arch-box sub">Allocations</div>
+        <div class="arch-box sub">Claim Mechanics</div>
+        <div class="arch-box sub">Protocol Data</div>
+      </div>
+
+      <div class="arch-connector">
+        <div class="arch-connector-line"></div>
+        <div class="arch-connector-line"></div>
+        <div class="arch-connector-head"></div>
+      </div>
+
+      <!-- Detection Engine -->
+      <div class="arch-box engine" style="min-width: 220px; padding: 12px 20px;">
+        Detection Engine
+      </div>
+
+      <!-- Detection sub-items -->
+      <div class="arch-split">
+        <div class="arch-split-col">
+          <div class="arch-box detect">Wallet Coordination</div>
+          <div class="arch-box detect">Recycled Wallets</div>
+        </div>
+        <div class="arch-split-col">
+          <div class="arch-box detect">Concentrated Exposure</div>
+          <div class="arch-box detect">Abnormal Claims</div>
+        </div>
+        <div class="arch-split-col">
+          <div class="arch-box detect">Behavioral Anomalies</div>
+          <div class="arch-box detect">Float Auth</div>
+        </div>
+        <div class="arch-split-col">
+          <div class="arch-box detect">Low Protocol Usage</div>
+        </div>
+      </div>
+
+      <div class="arch-connector">
+        <div class="arch-connector-line"></div>
+        <div class="arch-connector-line"></div>
+        <div class="arch-connector-head"></div>
+      </div>
+
+      <!-- Dashboard -->
+      <div class="arch-box dashboard" style="min-width: 200px; padding: 12px 20px;">
+        Dashboard
+      </div>
+
+      <div class="arch-connector">
+        <div class="arch-connector-line"></div>
+        <div class="arch-connector-line"></div>
+        <div class="arch-connector-head"></div>
+      </div>
+
+      <!-- Risk Flags -->
+      <div class="arch-box alert" style="min-width: 200px; padding: 12px 20px;">
+        Risk Flags + Alerts
+      </div>
+    </div>
+  </section>
+
+  <!-- 8. Technical Challenges -->
+  <section id="challenges" class="fade-in">
+    <span class="section-label">Engineering</span>
+    <h2 class="section-title">Technical Challenges</h2>
+    <p class="section-subtitle">
+      The hardest problems to solve in building a reliable pre-listing risk intelligence platform.
+    </p>
+
+    <div class="challenge-grid">
+      <div class="challenge-card">
+        <div class="challenge-card-num">CHALLENGE 1</div>
+        <div class="challenge-card-title">Continuous Monitoring</div>
+        <div class="challenge-card-desc">
+          Real-time ingestion of on-chain data at scale. Getting attribution right across millions of wallets. Defining and tuning alert thresholds that balance signal vs. noise.
+        </div>
+      </div>
+
+      <div class="challenge-card">
+        <div class="challenge-card-num">CHALLENGE 2</div>
+        <div class="challenge-card-title">State Changes Over Time</div>
+        <div class="challenge-card-desc">
+          Wallet behavior evolves — an address that looks clean during launch may participate in manipulation later. Tracking these state transitions without false positives is non-trivial.
+        </div>
+      </div>
+
+      <div class="challenge-card">
+        <div class="challenge-card-num">CHALLENGE 3</div>
+        <div class="challenge-card-title">Historical Baseline</div>
+        <div class="challenge-card-desc">
+          Building a reliable historical baseline to distinguish normal from anomalous. Without history, every pattern looks suspicious — or nothing does. Requires months of labeled data.
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- Footer -->
+<footer class="footer">
+  <div class="footer-links">
+    <a href="./">← How Hermes Agent Works</a>
+    <a href="#">Back to top ↑</a>
+  </div>
+  <p>
+    Signal — Pre-Listing Risk Intelligence | CliqueOfficial
+  </p>
+</footer>
+
+<!-- Back to top -->
+<button class="back-to-top" id="backToTop" aria-label="Back to top" title="Back to top">↑</button>
+
+<script>
+// Mobile menu toggle
+const hamburger = document.getElementById('hamburger');
+const mobileMenu = document.getElementById('mobileMenu');
+
+hamburger.addEventListener('click', () => {
+  const isOpen = mobileMenu.classList.toggle('open');
+  hamburger.classList.toggle('active', isOpen);
+  hamburger.setAttribute('aria-expanded', isOpen);
+});
+
+// Close mobile menu when a link is clicked
+mobileMenu.querySelectorAll('a').forEach(link => {
+  link.addEventListener('click', () => {
+    mobileMenu.classList.remove('open');
+    hamburger.classList.remove('active');
+    hamburger.setAttribute('aria-expanded', 'false');
+  });
+});
+
+// Back to top button
+const backToTop = document.getElementById('backToTop');
+
+function updateBackToTop() {
+  if (window.scrollY > 400) {
+    backToTop.classList.add('visible');
+  } else {
+    backToTop.classList.remove('visible');
+  }
+}
+
+window.addEventListener('scroll', updateBackToTop, { passive: true });
+
+backToTop.addEventListener('click', () => {
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+
+// Scroll-triggered fade-in
+const fadeEls = document.querySelectorAll('.fade-in');
+
+const fadeObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+      fadeObserver.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+
+fadeEls.forEach(el => fadeObserver.observe(el));
+
+// Initial check for back-to-top
+updateBackToTop();
+</script>
+
+</body>
+</html>
