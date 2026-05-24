@@ -876,6 +876,7 @@ section:last-of-type { border-bottom: none; }
       <li><a href="#workflow">Workflow</a></li>
       <li><a href="#dashboard">Dashboard</a></li>
       <li><a href="#architecture">Architecture</a></li>
+      <li><a href="#webhook">Webhooks</a></li>
       <li><a href="#challenges">Challenges</a></li>
     </ul>
     <button class="hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false">
@@ -894,6 +895,7 @@ section:last-of-type { border-bottom: none; }
   <a href="#workflow">🔄 Workflow</a>
   <a href="#dashboard">📋 MVP Dashboard</a>
   <a href="#architecture">🏗 Architecture</a>
+  <a href="#webhook">🔌 Webhook System</a>
   <a href="#challenges">⚡ Technical Challenges</a>
 </div>
 
@@ -909,6 +911,12 @@ section:last-of-type { border-bottom: none; }
       Detect wash trading, Sybil attacks, and coordinated manipulation before tokens go live.
     </p>
     <span class="hero-context">Phase ① — 5-10 pilot partners, targeting V1 launch by 2026-05-21</span>
+    <div style="margin-top:18px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap;">
+      <span class="onboarding-tag" style="color:var(--accent-cyan);border-color:rgba(88,166,255,0.2);">Rust 1.78+</span>
+      <span class="onboarding-tag" style="color:var(--accent-amber);border-color:rgba(240,192,64,0.2);">Axum 0.8</span>
+      <span class="onboarding-tag" style="color:var(--accent-green);border-color:rgba(63,185,80,0.2);">SQLx + PostgreSQL</span>
+      <span class="onboarding-tag" style="color:var(--accent-purple);border-color:rgba(188,140,255,0.2);">33 tests passing</span>
+    </div>
   </section>
 
   <!-- 2. Product Overview -->
@@ -1024,43 +1032,48 @@ section:last-of-type { border-bottom: none; }
 
     <div class="detection-grid">
       <div class="detection-card">
-        <div class="detection-card-title">🔗 Wallet Coordination</div>
-        <div class="detection-card-desc">Clusters of wallets acting in concert to simulate organic activity</div>
+        <div class="detection-card-title">✅ Wallet Coordination</div>
+        <div class="detection-card-desc">Union-Find clustering over wallet edge graphs. ≥5 wallets flagged as Sybil. Active — implemented in Rust.</div>
       </div>
 
       <div class="detection-card">
-        <div class="detection-card-title">♻️ Recycled Wallets</div>
-        <div class="detection-card-desc">Addresses reused across multiple suspicious launches</div>
+        <div class="detection-card-title">✅ Holder Concentration</div>
+        <div class="detection-card-desc">Gini coefficient + top-N holder analysis. ≥0.70 Gini raises flags. Active — implemented in Rust.</div>
       </div>
 
       <div class="detection-card">
-        <div class="detection-card-title">📉 Float Auth</div>
-        <div class="detection-card-desc">Fake liquidity or artificially inflated circulating float</div>
+        <div class="detection-card-title">🔶 Recycled Wallets</div>
+        <div class="detection-card-desc">Addresses reused across multiple suspicious launches. Pending — stubbed, needs cross-project index.</div>
       </div>
 
       <div class="detection-card">
-        <div class="detection-card-title">🎯 Concentrated Exposure</div>
-        <div class="detection-card-desc">Tokens concentrated in a small number of hands, creating manipulation risk</div>
+        <div class="detection-card-title">🔶 Float Authenticity</div>
+        <div class="detection-card-desc">Fake liquidity or artificially inflated circulating float. Pending — needs exchange reserve proofs.</div>
       </div>
 
       <div class="detection-card">
-        <div class="detection-card-title">⚠️ Abnormal Claims</div>
-        <div class="detection-card-desc">Unusual claim patterns that deviate from stated distribution rules</div>
+        <div class="detection-card-title">🔶 Concentrated Exposure</div>
+        <div class="detection-card-desc">Single entity exposure risk from large holders. Pending — needs entity attribution data.</div>
       </div>
 
       <div class="detection-card">
-        <div class="detection-card-title">📭 Low Protocol Usage</div>
-        <div class="detection-card-desc">Token with little to no genuine on-chain activity or protocol interaction</div>
+        <div class="detection-card-title">🔶 Abnormal Claims</div>
+        <div class="detection-card-desc">Unusual claim patterns deviating from stated distribution rules. Pending — needs claim TX pipeline.</div>
       </div>
 
       <div class="detection-card">
-        <div class="detection-card-title">🔬 Behavioral Anomalies</div>
-        <div class="detection-card-desc">Deviations from normal launch patterns based on historical baselines</div>
+        <div class="detection-card-title">🔶 Protocol Usage</div>
+        <div class="detection-card-desc">Token with little to no genuine on-chain activity. Pending — needs protocol TX history.</div>
+      </div>
+
+      <div class="detection-card">
+        <div class="detection-card-title">🔶 Behavioral Anomalies</div>
+        <div class="detection-card-desc">Deviations from normal launch patterns based on historical baselines. Pending — needs ML model.</div>
       </div>
     </div>
 
     <p class="detection-note">
-      🔍 <strong>Detection engine: 7 signals analyzed per token launch</strong>
+      ✅ <strong>2 active modules</strong> (concentration + coordination) | 🔶 <strong>6 pending</strong> — all declared, pipelines stubbed. Active modules are pure computation, tested in isolation with 11 unit tests.
     </p>
   </section>
 
@@ -1153,117 +1166,194 @@ section:last-of-type { border-bottom: none; }
     </div>
 
     <p class="mvp-note">
-      📋 <strong>MVP scope is onboarding + core engine + dashboard + vendor webhook integration.</strong> Workflow infrastructure (review queues, collaboration) is post-V1.
+      ✅ <strong>MVP delivered:</strong> Projects API (5 endpoints), detection pipeline (2 active modules), dashboard aggregation, webhook provider system (Chainalysis + HMAC + idempotency). 33 tests passing, cargo clippy clean. <a href="https://github.com/alannotnerd/signal" style="color:var(--accent-cyan)">alannotnerd/signal</a>
     </p>
   </section>
 
   <!-- 7. Architecture -->
   <section id="architecture" class="fade-in">
-    <span class="section-label">System Design</span>
-    <h2 class="section-title">Architecture — The Big Picture</h2>
+    <span class="section-label">Implementation</span>
+    <h2 class="section-title">Architecture — Rust + Axum + PostgreSQL</h2>
     <p class="section-subtitle">
-      How data flows from token launch ingestion through detection to risk alerts. Continuous monitoring is handled by a 3rd-party vendor; Signal provides a webhook endpoint to receive vendor data.
+      Monolithic Rust service at <code>alannotnerd/signal</code>. 12 API endpoints, 8 database tables, 2 active detection modules, pluggable webhook provider system.
     </p>
 
     <div class="arch-diagram">
-      <!-- Entry -->
-      <div class="arch-box entry" style="min-width: 200px; padding: 12px 20px; font-size: 0.78rem;">
-        Token Launch Data
+      <!-- API Layer -->
+      <div class="arch-box engine" style="min-width: 250px; padding: 12px 20px; font-size: 0.78rem;">
+        Axum HTTP Router (0.0.0.0:3000)
       </div>
 
       <div class="arch-connector">
-        <div class="arch-connector-line"></div>
-        <div class="arch-connector-line"></div>
+        <div class="arch-connector-line"></div><div class="arch-connector-line"></div>
         <div class="arch-connector-head"></div>
       </div>
 
-      <!-- Onboarding Pipeline -->
-      <div class="arch-box pipeline" style="min-width: 200px; padding: 12px 20px;">
-        Onboarding Pipeline
-      </div>
-
-      <!-- Onboarding sub-items -->
       <div class="arch-split">
-        <div class="arch-box sub">Contracts</div>
-        <div class="arch-box sub">Wallets</div>
-        <div class="arch-box sub">Allocations</div>
-        <div class="arch-box sub">Claim Mechanics</div>
-        <div class="arch-box sub">Protocol Data</div>
+        <div class="arch-split-col">
+          <div class="arch-box pipeline">Projects API</div>
+          <div class="arch-box sub">5 CRUD endpoints</div>
+        </div>
+        <div class="arch-split-col">
+          <div class="arch-box pipeline">Analysis API</div>
+          <div class="arch-box sub">Run + status</div>
+        </div>
+        <div class="arch-split-col">
+          <div class="arch-box pipeline">Dashboard API</div>
+          <div class="arch-box sub">Aggregated risk view</div>
+        </div>
+        <div class="arch-split-col">
+          <div class="arch-box pipeline">Webhook API</div>
+          <div class="arch-box sub">7 endpoints</div>
+        </div>
       </div>
 
       <div class="arch-connector">
-        <div class="arch-connector-line"></div>
-        <div class="arch-connector-line"></div>
+        <div class="arch-connector-line"></div><div class="arch-connector-line"></div>
         <div class="arch-connector-head"></div>
       </div>
 
       <!-- Detection Engine -->
-      <div class="arch-box engine" style="min-width: 220px; padding: 12px 20px;">
-        Detection Engine
+      <div class="arch-box engine" style="min-width: 280px; padding: 12px 20px; font-size: 0.78rem;">
+        Detection Pipeline
       </div>
 
-      <!-- Detection sub-items -->
       <div class="arch-split">
         <div class="arch-split-col">
-          <div class="arch-box detect">Wallet Coordination</div>
-          <div class="arch-box detect">Recycled Wallets</div>
+          <div class="arch-box detect">✅ Concentration
+            <span style="display:block;font-size:0.6rem;color:var(--text-muted)">Gini + top-N</span>
+          </div>
         </div>
         <div class="arch-split-col">
-          <div class="arch-box detect">Concentrated Exposure</div>
-          <div class="arch-box detect">Abnormal Claims</div>
+          <div class="arch-box detect">✅ Coordination
+            <span style="display:block;font-size:0.6rem;color:var(--text-muted)">Union-Find</span>
+          </div>
         </div>
         <div class="arch-split-col">
-          <div class="arch-box detect">Behavioral Anomalies</div>
-          <div class="arch-box detect">Float Auth</div>
-        </div>
-        <div class="arch-split-col">
-          <div class="arch-box detect">Low Protocol Usage</div>
+          <div class="arch-box sub">🔶 6 pending
+            <span style="display:block;font-size:0.6rem;color:var(--text-muted)">stubbed</span>
+          </div>
         </div>
       </div>
 
       <div class="arch-connector">
-        <div class="arch-connector-line"></div>
-        <div class="arch-connector-line"></div>
+        <div class="arch-connector-line"></div><div class="arch-connector-line"></div>
         <div class="arch-connector-head"></div>
       </div>
 
-      <!-- Dashboard -->
-      <div class="arch-box dashboard" style="min-width: 200px; padding: 12px 20px;">
-        Dashboard
+      <!-- Database -->
+      <div class="arch-box dashboard" style="min-width: 280px; padding: 12px 20px;">
+        PostgreSQL — 8 tables
       </div>
 
-      <div class="arch-connector">
-        <div class="arch-connector-line"></div>
-        <div class="arch-connector-line"></div>
-        <div class="arch-connector-head"></div>
-      </div>
-
-      <!-- Risk Flags -->
-      <div class="arch-box alert" style="min-width: 200px; padding: 12px 20px;">
-        Risk Flags + Alerts
+      <div class="arch-split">
+        <div class="arch-box sub">projects</div>
+        <div class="arch-box sub">risk_flags</div>
+        <div class="arch-box sub">holder_concentration</div>
+        <div class="arch-box sub">identity_clusters</div>
+        <div class="arch-box sub">assessment_runs</div>
+        <div class="arch-box sub">webhook_providers</div>
+        <div class="arch-box sub">webhook_events</div>
+        <div class="arch-box sub">webhook_snapshots</div>
       </div>
 
       <!-- Vendor Boundary -->
       <div class="arch-vendor-line"></div>
-      <div class="arch-label" style="padding: 4px 0;">VENDOR BOUNDARY</div>
+      <div class="arch-label" style="padding: 4px 0;">EXTERNAL VENDOR</div>
 
-      <!-- 3rd-Party Vendor -->
-      <div class="arch-box vendor" style="min-width: 200px; padding: 12px 20px;">
-        3rd-Party Monitoring Vendor
+      <!-- Webhook Providers -->
+      <div class="arch-box vendor" style="min-width: 280px; padding: 12px 20px; font-size: 0.78rem;">
+        Webhook Providers (trait impls)
       </div>
 
-      <div class="arch-connector">
-        <div class="arch-connector-line"></div>
-        <div class="arch-connector-line"></div>
-        <div class="arch-connector-head"></div>
+      <div class="arch-split">
+        <div class="arch-box webhook">✅ Chainalysis KYT
+          <span style="display:block;font-size:0.6rem;opacity:0.8">501 loc, 17 tests</span>
+        </div>
+        <div class="arch-box webhook">✅ Noop
+          <span style="display:block;font-size:0.6rem;opacity:0.8">test provider</span>
+        </div>
       </div>
 
-      <!-- Signal Webhook -->
-      <div class="arch-box webhook" style="min-width: 200px; padding: 12px 20px;">
-        ← Signal Webhook Endpoint
+      <div class="arch-label" style="max-width: 500px; margin: 8px auto;">
+        HMAC-SHA256 + API-key auth | Idempotency via DB unique index | JSON Schema validation | Risk flags + snapshots
+      </div>
+    </div>
+  </section>
+
+  <!-- 8. Webhook Deep Dive -->
+  <section id="webhook" class="fade-in">
+    <span class="section-label">Deep Dive</span>
+    <h2 class="section-title">Webhook Provider System</h2>
+    <p class="section-subtitle">
+      Pluggable provider architecture — add a new vendor by implementing one trait. Signature verification before deserialization. Database-enforced idempotency.
+    </p>
+
+    <div class="workflow-pipeline">
+      <div class="workflow-step">
+        <span class="workflow-step-num">STEP 1</span>
+        <div class="workflow-step-title">🔐 Verify Signature</div>
+        <div class="workflow-step-desc">HMAC-SHA256 or API-key check before touching the DB. Returns 401 on failure.</div>
       </div>
 
-      <div class="arch-label" style="max-width: 400px; margin: 4px auto;">Vendor POSTs monitoring data → Signal processes &amp; updates dashboard</div>
+      <div class="workflow-arrow">
+        <div class="workflow-arrow-line"></div>
+        <div class="workflow-arrow-head"></div>
+      </div>
+
+      <div class="workflow-step">
+        <span class="workflow-step-num">STEP 2</span>
+        <div class="workflow-step-title">🪪 Check Idempotency</div>
+        <div class="workflow-step-desc">UNIQUE(provider_id, idempotency_key). Replays return 200 + duplicate: true.</div>
+      </div>
+
+      <div class="workflow-arrow">
+        <div class="workflow-arrow-line"></div>
+        <div class="workflow-arrow-head"></div>
+      </div>
+
+      <div class="workflow-step">
+        <span class="workflow-step-num">STEP 3</span>
+        <div class="workflow-step-title">✅ Validate Schema</div>
+        <div class="workflow-step-desc">JSON Schema draft-07 validation. Cross-check event_type matches payload.</div>
+      </div>
+
+      <div class="workflow-arrow">
+        <div class="workflow-arrow-line"></div>
+        <div class="workflow-arrow-head"></div>
+      </div>
+
+      <div class="workflow-step">
+        <span class="workflow-step-num">STEP 4</span>
+        <div class="workflow-step-title">⚙️ Process + Flag</div>
+        <div class="workflow-step-desc">Generate risk_flags (HIGH/SEVERE) + webhook_snapshots (all events)</div>
+      </div>
+    </div>
+
+    <div class="challenge-grid" style="margin-top: 28px;">
+      <div class="challenge-card">
+        <div class="challenge-card-num">PROVIDER</div>
+        <div class="challenge-card-title">Chainalysis KYT</div>
+        <div class="challenge-card-desc">
+          501-line implementation. Handles address_risk_change, transaction_alert, entity_alert. Maps SEVERE→critical, HIGH→high. 17 unit tests. All alerts generate snapshots for historical baselines.
+        </div>
+      </div>
+
+      <div class="challenge-card">
+        <div class="challenge-card-num">TRAIT</div>
+        <div class="challenge-card-title">WebhookProvider</div>
+        <div class="challenge-card-desc">
+          Async trait with validate(), process(), verify_signature(). ProviderRegistry is an Arc&lt;HashMap&gt; in AppState — thread-safe, shared across all handlers. New providers: implement trait → register in main.rs.
+        </div>
+      </div>
+
+      <div class="challenge-card">
+        <div class="challenge-card-num">API</div>
+        <div class="challenge-card-title">Management Endpoints</div>
+        <div class="challenge-card-desc">
+          Full CRUD at /api/webhook/providers. Config stored as JSONB in webhook_providers table. Auth method, secrets, headers all configurable per provider at runtime.
+        </div>
+      </div>
     </div>
   </section>
 
@@ -1280,7 +1370,7 @@ section:last-of-type { border-bottom: none; }
         <div class="challenge-card-num">CHALLENGE 1</div>
         <div class="challenge-card-title">Webhook Reliability</div>
         <div class="challenge-card-desc">
-          Ensure the webhook endpoint can handle vendor payloads reliably — idempotency, retries, schema validation, and alert deduplication before surfacing to the dashboard.
+          Solved: Database-enforced idempotency (UNIQUE index on provider_id + idempotency_key), HMAC-SHA256 signature verification before deserialization, JSON Schema draft-07 validation per provider. Integration tests verify 200, 401, and duplicate replay.
         </div>
       </div>
 
@@ -1288,7 +1378,7 @@ section:last-of-type { border-bottom: none; }
         <div class="challenge-card-num">CHALLENGE 2</div>
         <div class="challenge-card-title">State Changes Over Time</div>
         <div class="challenge-card-desc">
-          Wallet behavior evolves — an address that looks clean during launch may participate in manipulation later. Tracking these state transitions without false positives is non-trivial.
+          Solved: webhook_snapshots table captures entity state at every event. Indexed by (provider_id, project_id, entity_id, snapshot_type, captured_at DESC) for efficient time-series queries. Chainalysis provider snapshots ALL alerts, not just HIGH/SEVERE.
         </div>
       </div>
 
@@ -1296,7 +1386,7 @@ section:last-of-type { border-bottom: none; }
         <div class="challenge-card-num">CHALLENGE 3</div>
         <div class="challenge-card-title">Historical Baseline</div>
         <div class="challenge-card-desc">
-          Building a reliable historical baseline to distinguish normal from anomalous. Without history, every pattern looks suspicious — or nothing does. Requires months of labeled data.
+          Foundation laid: snapshots provide the raw data for time-series analysis. 6 pending detection modules are stubbed — each needs a real data pipeline. The detection orchestrator is designed to add modules without refactoring.
         </div>
       </div>
     </div>
@@ -1308,10 +1398,11 @@ section:last-of-type { border-bottom: none; }
 <footer class="footer">
   <div class="footer-links">
     <a href="./">← How Hermes Agent Works</a>
+    <a href="https://github.com/alannotnerd/signal">GitHub →</a>
     <a href="#">Back to top ↑</a>
   </div>
   <p>
-    Signal — Pre-Listing Risk Intelligence | CliqueOfficial
+    Signal — Rust MVP | <code>alannotnerd/signal</code> | 33 tests | cargo clippy clean
   </p>
 </footer>
 
